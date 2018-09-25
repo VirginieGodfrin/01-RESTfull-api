@@ -1,0 +1,6 @@
+app_web:
+    resource: "@AppBundle/Controller/web"
+    type:     annotation
+app_api:
+    resource: "@AppBundle/Controller/api"
+    type:     annotation
