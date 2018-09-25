@@ -9,8 +9,18 @@ $client = new GuzzleHttp\Client([
 	]
 ]);
 
-// First end point 
-$response = $client->post('/api/programmers');
+// First end point
+$nickname = 'ObjectOrienter'.rand(0, 999); 
+$data = array(
+	'nickname' => $nickname, 
+	'avatarNumber' => 5, 
+	'tagLine' => 'a test dev!'
+);
+// send json data in a array with key: body 
+$response = $client->post('/api/programmers', [ 
+	'body' => json_encode($data)
+]);
+
 
 echo $response; 
 echo "\n\n";
