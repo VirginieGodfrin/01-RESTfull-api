@@ -25,10 +25,6 @@ class ProgrammerController extends  BaseController
 		$body = $request->getContent();
 		$data = json_decode($body, true);
 		$programmer = new Programmer();
-		$form = $this->createForm(new ProgrammerType(), $programmer);
-		// $form->submit($data);
-		$form->isSubmitted($data);
-
 		$programmer->setNickname($data['nickname']);
 		$programmer->setAvatarNumber($data['avatarNumber']);
 		$programmer->setTagLine($data['tagLine']);
