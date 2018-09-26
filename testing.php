@@ -22,8 +22,11 @@ $response = $client->post('/api/programmers', [
 	'body' => json_encode($data)
 ]);
 
+// handle url
+$programmerUrl = $response->getHeader('Location');
+
 // 2) GET a programmer resource
-$response = $client->get('/api/programmers/'.$nickname);
+$response = $client->get($programmerUrl);
 
 echo $response; 
 echo "\n\n";
