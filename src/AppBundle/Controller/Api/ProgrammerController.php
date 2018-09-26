@@ -11,7 +11,7 @@ use Symfony\Component\HttpFoundation\Request;
 use AppBundle\Entity\User;
 use AppBundle\Entity\Programmer;
 use AppBundle\Form\ProgrammerType;
-
+use Symfony\Component\HttpFoundation\JsonResponse;
 
 class ProgrammerController extends  BaseController
 {
@@ -34,7 +34,9 @@ class ProgrammerController extends  BaseController
 		$em->persist($programmer);
 		$em->flush();
 		// when you create a resource, the status code should be 201:
-		$response = new Response('It worked. Believe me - I\'m an API', 201);
+		$data = $this->serializeProgrammer($programmer);
+		// $response = new Response(json_encode($data), 201);
+		$response = new JsonResponse($data, 201);
 		// and best-practices say that you should set a Location header on the response
 		// handle url
 		$url = $this->generateUrl(
@@ -42,6 +44,7 @@ class ProgrammerController extends  BaseController
 			['nickname' => $programmer->getNickname()] 
 		);
 		$response->headers->set('Location', $url);
+		$response->headers->set('Content-Type', 'application/json');
 		return $response;
 	}
 
@@ -62,16 +65,46 @@ class ProgrammerController extends  BaseController
 			$nickname ));
 		}
 
-		$data = array(
+		$data = $this->serializeProgrammer($programmer);
+
+		// $response = new Response(json_encode($data), 200);
+		$response = new JsonResponse($data, 201);
+		// setting Content-Type: application/json
+		$response->headers->set('Content-Type', 'application/json');
+		return $response;
+	}
+
+	/**
+	 * @Route("/api/programmers") 
+	 * @Method("GET")
+	 */
+	public function listAction()
+	{
+		$programmers = $this->getDoctrine() 
+			->getRepository('AppBundle:Programmer') 
+			->findAll();
+		// we need to loop over the Programmers and serialize them one-by-one
+		// by putting the collection inside a key, we have room for more root keys later like maybe count or offset for pagination
+		// your outer JSON should always be an object, not an array (JSON Hijacking)
+		$data = ['programmers' => []];
+		foreach ($programmers as $programmer) {
+			$data['programmers'][] = $this->serializeProgrammer($programmer); 
+		}
+
+		// $response = new Response(json_encode($data), 200);
+		$response = new JsonResponse($data, 201);
+		$response->headers->set('Content-Type', 'application/json');
+		return $response;
+	}
+
+	// private function that return an array 
+	private function serializeProgrammer(Programmer $programmer) {
+		return array(
 			'nickname' => $programmer->getNickname(), 
 			'avatarNumber' => $programmer->getAvatarNumber(), 
 			'powerLevel' => $programmer->getPowerLevel(), 
 			'tagLine' => $programmer->getTagLine(),
 		);
-		$response = new Response(json_encode($data), 200);
-		// setting Content-Type: application/json
-		$response->headers->set('Content-Type', 'application/json');
-		return $response;
 	}
 
 }
