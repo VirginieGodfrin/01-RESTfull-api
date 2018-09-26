@@ -1,34 +1,26 @@
 <?php
 
 namespace AppBundle\Tests\Controller\API;
+use AppBundle\Test\ApiTestCase;
 
-class ProgrammerControllerTest extends \PHPUnit_Framework_TestCase
+class ProgrammerControllerTest extends ApiTestCase
 {
 	public function testPOST()
 	{
-		$client = new \GuzzleHttp\Client([
-			'base_url' => 'http://127.0.0.1:8001', 
-			'defaults' => [
-				'exceptions' => false
-			]
-		]);
-
-		// $nickname = 'ObjectOrienter'.rand(0, 999); 
+		$nickname = 'ObjectOrienter'.rand(0, 999); 
 		$data = array(
-            'nickname' => 'ObjectOrienter',
+            'nickname' => $nickname,
             'avatarNumber' => 5,
             'tagLine' => 'a test dev!'
         );
-
-        // 1) Create a programmer resource
-        $response = $client->post('/api/programmers', [ 
+        $response = $this->client->post('/api/programmers', [ 
 			'body' => json_encode($data)
 		]);
+        $statusCode = $response->getStatusCode();
 
-        $this->assertEquals(201, $response->getStatusCode());
+		$this->assertEquals(201, $response->getStatusCode());
 		$this->assertTrue($response->hasHeader('Location'));
 		$finishedData = json_decode($response->getBody(true), true);
 		$this->assertArrayHasKey('nickname', $finishedData);
-
 	}
 }
