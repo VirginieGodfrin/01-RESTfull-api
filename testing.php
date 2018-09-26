@@ -21,6 +21,5 @@ $response = $client->post('/api/programmers', [
 	'body' => json_encode($data)
 ]);
 
-
 echo $response; 
 echo "\n\n";

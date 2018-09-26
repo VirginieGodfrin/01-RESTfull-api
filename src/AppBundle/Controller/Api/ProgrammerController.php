@@ -10,6 +10,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\HttpFoundation\Request;
 use AppBundle\Entity\User;
 use AppBundle\Entity\Programmer;
+use AppBundle\Form\ProgrammerType;
 
 
 class ProgrammerController extends  BaseController
@@ -20,20 +21,26 @@ class ProgrammerController extends  BaseController
 	*/
 	public function newAction(Request $request)
 	{
-		// json decode the body into an array
-		$data = json_decode($request->getContent(), true);
-		$programmer = new Programmer;
-		// pass data to programmer
+
+		$body = $request->getContent();
+		$data = json_decode($body, true);
+		$programmer = new Programmer();
+		$form = $this->createForm(new ProgrammerType(), $programmer);
+		// $form->submit($data);
+		$form->isSubmitted($data);
+
 		$programmer->setNickname($data['nickname']);
 		$programmer->setAvatarNumber($data['avatarNumber']);
 		$programmer->setTagLine($data['tagLine']);
 		$programmer->setUser($this->findUserByUsername('weaverryan'));
 
-		$em = $this->getDoctrine()->getManager(); 
+		$em = $this->getDoctrine()->getManager();
 		$em->persist($programmer);
 		$em->flush();
-
-		return new Response('It worked. Believe me - I\'m an API');
+		// when you create a resource, the status code should be 201:
+		return new Response('It worked. Believe me - I\'m an API', 201);
+		// and best-practices say that you should set a Location header on the response
+		$response->headers->set('Location', '/some/programmer/url');
 	}
 
 }
