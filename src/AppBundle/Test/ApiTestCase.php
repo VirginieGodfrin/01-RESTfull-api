@@ -12,6 +12,9 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Console\Helper\FormatterHelper;
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\DomCrawler\Crawler;
+use AppBundle\Entity\User;
+use Symfony\Component\PropertyAccess\PropertyAccess;
+use AppBundle\Entity\Programmer;
 
 class ApiTestCase extends KernelTestCase
 {
@@ -213,5 +216,52 @@ class ApiTestCase extends KernelTestCase
 
         $this->printDebug($output);
     }
+
+    // make sure that user is in the database
+    protected function createUser($username, $plainPassword = 'foo')
+    {
+    	$user = new User();
+		$user->setUsername($username); $user->setEmail($username.'@foo.com');
+		$password = $this->getService('security.password_encoder')
+			->encodePassword($user, $plainPassword); 
+		$user->setPassword($password);
+
+		$em = $this->getEntityManager(); 
+		$em->persist($user); 
+		$em->flush();
+		return $user;
+    }
+
+    /**
+	 * @return EntityManager
+	 */
+	protected function getEntityManager() 
+	{
+		return $this->getService('doctrine.orm.entity_manager');
+	}
+	// in use to testGETProgrammer()
+	protected function createProgrammer(array $data) {
+		$data = array_merge(array( 
+			'powerLevel' => rand(0, 10),
+			'user' => $this->getEntityManager()
+				->getRepository('AppBundle:User')
+				->findAny()
+			), 
+			$data
+		);
+
+		// The PropertyAccess component is what works behind the scenes with Symfony's Form component. 
+		// So, it's great at calling getters and setters, but it also has some really cool superpowers that we'll need soon.
+		$accessor = PropertyAccess::createPropertyAccessor();
+		$programmer = new Programmer();
+		foreach ($data as $key => $value) {
+			$accessor->setValue($programmer, $key, $value); 
+		}
+
+		$this->getEntityManager()->persist($programmer); 
+		$this->getEntityManager()->flush();
+		return $programmer;
+
+	}
 	
 }

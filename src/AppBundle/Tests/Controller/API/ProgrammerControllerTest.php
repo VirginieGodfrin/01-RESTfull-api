@@ -5,6 +5,13 @@ use AppBundle\Test\ApiTestCase;
 
 class ProgrammerControllerTest extends ApiTestCase
 {
+	// create user 
+	protected function setUp()
+	{
+		parent::setUp(); 
+		$this->createUser('weaverryan');
+	}
+
 	public function testPOST()
 	{
 		$nickname = 'ObjectOrienter'.rand(0, 999); 
@@ -27,5 +34,31 @@ class ProgrammerControllerTest extends ApiTestCase
 		$finishedData = json_decode($response->getBody(true), true);
 		$this->assertArrayHasKey('nickname', $finishedData);
 		$this->assertSame('ObjectOrienter', $finishedData['nickname']);
+	}
+
+	public function testGETProgrammer()
+	{
+		// before we make a request to fetch a single programmer, we need to make sure there's one in the database !
+		$this->createProgrammer(array( 
+			'nickname' => 'UnitTester', 
+			'avatarNumber' => 3,
+		));
+
+		$response = $this->client->get('/api/programmers/UnitTester');
+		// assertequals & assertSame work both
+		$this->assertSame(200, $response->getStatusCode());
+		// Guzzle can decode the JSON for us if we call $response->json(), this gives us the decoded JSON
+		$data = $response->json();
+		// in assertEquals() put programmers property names as the first argument 
+		// & the actual value in the second ( array_keys() on the json decoded response body - this give us the field names)
+		$this->assertSame(
+			array(
+				'nickname', 
+				'avatarNumber', 
+				'powerLevel', 
+				'tagLine'
+			), 
+			array_keys($data)
+		);
 	}
 }
