@@ -13,11 +13,13 @@ class ProgrammerControllerTest extends ApiTestCase
             'avatarNumber' => 5,
             'tagLine' => 'a test dev!'
         );
+        // Extend the base class ApitestCase
         $response = $this->client->post('/api/programmers', [ 
 			'body' => json_encode($data)
 		]);
-        $statusCode = $response->getStatusCode();
-
+		
+		// assert... test a value 
+		// assertEquals: Reports an error identified by $message if the two parameters are not equal.
 		$this->assertEquals(201, $response->getStatusCode());
 		$this->assertTrue($response->hasHeader('Location'));
 		$finishedData = json_decode($response->getBody(true), true);
