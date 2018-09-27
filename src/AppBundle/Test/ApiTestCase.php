@@ -40,6 +40,8 @@ class ApiTestCase extends KernelTestCase
 	 */
 	private $output;
 
+	private $responseAsserter;
+
     public static function setUpBeforeClass()
     {
         self::$staticClient = new Client([
@@ -262,6 +264,16 @@ class ApiTestCase extends KernelTestCase
 		$this->getEntityManager()->flush();
 		return $programmer;
 
+	}
+
+	/**
+	 * @return ResponseAsserter
+	 */
+	protected function asserter() {
+		if ($this->responseAsserter === null) { 
+			$this->responseAsserter = new ResponseAsserter();
+		}
+		return $this->responseAsserter; 
 	}
 	
 }

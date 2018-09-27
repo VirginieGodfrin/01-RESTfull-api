@@ -2,6 +2,7 @@
 
 namespace AppBundle\Tests\Controller\API;
 use AppBundle\Test\ApiTestCase;
+use AppBundle\Test\ResponseAsserter;
 
 class ProgrammerControllerTest extends ApiTestCase
 {
@@ -36,6 +37,7 @@ class ProgrammerControllerTest extends ApiTestCase
 		$this->assertSame('ObjectOrienter', $finishedData['nickname']);
 	}
 
+	// test one ressources
 	public function testGETProgrammer()
 	{
 		// before we make a request to fetch a single programmer, we need to make sure there's one in the database !
@@ -47,18 +49,39 @@ class ProgrammerControllerTest extends ApiTestCase
 		$response = $this->client->get('/api/programmers/UnitTester');
 		// assertequals & assertSame work both
 		$this->assertSame(200, $response->getStatusCode());
-		// Guzzle can decode the JSON for us if we call $response->json(), this gives us the decoded JSON
-		$data = $response->json();
-		// in assertEquals() put programmers property names as the first argument 
-		// & the actual value in the second ( array_keys() on the json decoded response body - this give us the field names)
-		$this->assertSame(
-			array(
+		$this->asserter()->assertResponsePropertiesExist($response, array(
 				'nickname', 
 				'avatarNumber', 
 				'powerLevel', 
 				'tagLine'
-			), 
-			array_keys($data)
-		);
+		));
+		// $this->asserter()->assertResponsePropertyEquals($response, 'nickname', 'UnitTester');
+		// because assertEquals do not work well I create assertResponsePropertySame that do the same work !
+		$this->asserter()->assertResponsePropertySame($response, 'nickname', 'UnitTester');
+	}
+
+	// testing the GET collection 
+	public function testGETProgrammersCollection() 
+	{
+		$this->createProgrammer(array( 
+			'nickname' => 'UnitTester', 
+			'avatarNumber' => 3,
+		)); 
+		$this->createProgrammer(array(
+			'nickname' => 'CowboyCoder',
+			'avatarNumber' => 5, 
+		));
+		// the request
+		$response = $this->client->get('/api/programmers');
+		// the assert
+		$this->assertSame(200, $response->getStatusCode());
+		// because listAction return an associative array with a programmers (the collection of programmers)
+		// let's first assert that there's a programmers key in the response and that it's an array.
+		$this->asserter()->assertResponsePropertyIsArray($response, 'programmers');
+		// next, let's assert that there are two things on this array
+		$this->asserter()->assertResponsePropertyCount($response, 'programmers', 2);
+		$this->asserter()->assertResponsePropertySame($response, 'programmers[1].nickname', 'CowboyCoder');
+		// to test it use this commande with --filter and fucntion name :
+		// php bin/phpunit -c app --filter testGETProgrammersCollection src/AppBundle/Tests/Controller/Api/ProgrammerControllerTest.php
 	}
 }
