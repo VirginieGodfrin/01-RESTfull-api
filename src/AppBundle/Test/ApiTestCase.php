@@ -15,6 +15,7 @@ use Symfony\Component\DomCrawler\Crawler;
 use AppBundle\Entity\User;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use AppBundle\Entity\Programmer;
+use GuzzleHttp\Event\BeforeEvent;
 
 class ApiTestCase extends KernelTestCase
 {
@@ -44,12 +45,25 @@ class ApiTestCase extends KernelTestCase
 
     public static function setUpBeforeClass()
     {
+        // add an environment variable
+        $baseUrl = getenv('TEST_BASE_URL');
         self::$staticClient = new Client([
-            'base_url' => 'http://localhost:8001',
+            'base_url' => $baseUrl,
             'defaults' => [
                 'exceptions' => false
             ]
         ]);
+        // Properly Prefixing all URIs
+        // when the Client is created in ApiTestCase, we can attach listeners to it
+        // we can do it before or after a request, here we do it before
+        // if the path starts with /api, prefix that with /app_test.php, this will make every request use that front controller.
+        // guaranteeing that /app_test.php is prefixed to all URLs
+        self::$staticClient->getEmitter()
+            ->on('before', function(BeforeEvent $event) {
+            $path = $event->getRequest()->getPath(); if (strpos($path, '/api') === 0) {
+                $event->getRequest()->setPath('/app_test.php'.$path); }
+            });
+
         self::$history = new History();
         self::$staticClient->getEmitter()
             ->attach(self::$history);

@@ -31,6 +31,10 @@ class ProgrammerControllerTest extends ApiTestCase
 		// if assertEquals don't work use assertSame() 
 		// https://stackoverflow.com/questions/10254180/difference-between-assertequals-and-assertsame-in-phpunit/10254238
 		$this->assertSame(201, $response->getStatusCode());
+		// fail
+		// $this->assertSame('/api/programmers/ObjectOrienter', $response->getHeader('Location'));
+		// work
+		$this->assertStringEndsWith('/api/programmers/ObjectOrienter', $response->getHeader('Location'));
 		$this->assertTrue($response->hasHeader('Location'));
 		$finishedData = json_decode($response->getBody(true), true);
 		$this->assertArrayHasKey('nickname', $finishedData);
@@ -73,6 +77,8 @@ class ProgrammerControllerTest extends ApiTestCase
 		));
 		// the request
 		$response = $this->client->get('/api/programmers');
+		// show the url
+		// $this->printLastRequestUrl();
 		// the assert
 		$this->assertSame(200, $response->getStatusCode());
 		// because listAction return an associative array with a programmers (the collection of programmers)
