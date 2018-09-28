@@ -35,9 +35,8 @@ class ProgrammerController extends  BaseController
 		$em = $this->getDoctrine()->getManager();
 		$em->persist($programmer);
 		$em->flush();
-		// serialise
-		$json = $this->serialize($programmer);
-		$response = new Response($json, 201);
+		// use createApiResponse form baseController to return reponse with correct content-type
+		$response = $this->createApiResponse($programmer, 201);
 		// and best-practices say that you should set a Location header on the response
 		// handle url
 		$url = $this->generateUrl(
@@ -45,7 +44,6 @@ class ProgrammerController extends  BaseController
 			['nickname' => $programmer->getNickname()] 
 		);
 		$response->headers->set('Location', $url);
-		$response->headers->set('Content-Type', 'application/json');
 		return $response;
 	}
 
@@ -65,12 +63,7 @@ class ProgrammerController extends  BaseController
 			'No programmer found with nickname "%s"',
 			$nickname ));
 		}
-		// how to use jms_serializer 2
-		$json = $this->serialize($programmer);
-		// no need jsonResponse with jms-s
-		$response = new Response($json, 200);
-		// setting Content-Type: application/json
-		$response->headers->set('Content-Type', 'application/json');
+		$response = $this->createApiResponse($programmer, 200);
 		return $response;
 	}
 
@@ -83,12 +76,8 @@ class ProgrammerController extends  BaseController
 		$programmers = $this->getDoctrine() 
 			->getRepository('AppBundle:Programmer') 
 			->findAll();
-		// how to use jms_serializer with a key 3 
 		$data = ['programmers' => $programmers];
-		$json = $this->serialize($data);
-
-		$response = new Response($json, 200);
-		$response->headers->set('Content-Type', 'application/json');
+		$response = $this->createApiResponse($data, 200);
 		return $response;
 	}
 
@@ -120,10 +109,7 @@ class ProgrammerController extends  BaseController
 		$em->persist($programmer);
 		$em->flush();
 
-		$json = $this->serialize($programmer); 
-		$response = new Response($json, 200);
-
-		$response->headers->set('Content-Type', 'application/json');
+		$response = $this->createApiResponse($programmer, 200);
 		return $response;
 
 	}
@@ -155,11 +141,11 @@ class ProgrammerController extends  BaseController
 		);
 	}
 
-	// how to use jms_serializer 1
-	private function serialize($data) {
-		return $this->container->get('jms_serializer') 
-			->serialize($data, 'json');
-	}
+	// // how to use jms_serializer 1
+	// private function serialize($data) {
+	// 	return $this->container->get('jms_serializer') 
+	// 		->serialize($data, 'json');
+	// }
 
 	// processForm: do the work of passing the data to the form 
 	private function processForm(Request $request, FormInterface $form)

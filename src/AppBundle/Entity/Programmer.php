@@ -3,9 +3,12 @@
 namespace AppBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use JMS\Serializer\Annotation as Serializer;
 
 /**
  * Programmer
+ *
+ * @Serializer\ExclusionPolicy("all")
  *
  * @ORM\Table(name="battle_programmer")
  * @ORM\Entity(repositoryClass="AppBundle\Repository\ProgrammerRepository")
@@ -24,12 +27,16 @@ class Programmer
     /**
      * @var string
      *
+     * @Serializer\Expose
+     *
      * @ORM\Column(name="nickname", type="string", length=100, unique=true)
      */
     private $nickname;
 
     /**
      * @var integer
+     *
+     * @Serializer\Expose
      *
      * @ORM\Column(name="avatarNumber", type="integer")
      */
@@ -38,12 +45,16 @@ class Programmer
     /**
      * @var string
      *
+     * @Serializer\Expose
+     *
      * @ORM\Column(name="tagLine", type="string", length=255, nullable=true)
      */
     private $tagLine;
 
     /**
      * @var integer
+     *
+     * @Serializer\Expose
      *
      * @ORM\Column(name="powerLevel", type="integer")
      */

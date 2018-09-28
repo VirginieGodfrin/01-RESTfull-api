@@ -63,6 +63,8 @@ class ProgrammerControllerTest extends ApiTestCase
 		// $this->asserter()->assertResponsePropertyEquals($response, 'nickname', 'UnitTester');
 		// because assertEquals do not work well I create assertResponsePropertySame that do the same work !
 		$this->asserter()->assertResponsePropertySame($response, 'nickname', 'UnitTester');
+		//debug the response
+		$this->debugResponse($response);
 	}
 
 	// testing the GET collection 

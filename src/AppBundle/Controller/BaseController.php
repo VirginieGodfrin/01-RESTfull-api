@@ -11,6 +11,8 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\HttpFoundation\Request;
 use AppBundle\Entity\User;
+use Symfony\Component\HttpFoundation\Response;
+use JMS\Serializer\SerializationContext;
 
 abstract class BaseController extends Controller
 {
@@ -108,5 +110,30 @@ abstract class BaseController extends Controller
     {
         return $this->getDoctrine()
             ->getRepository('AppBundle:ApiToken');
+    }
+
+    // baseController extends all the controller 
+    // When we use response, the Content-Type become text/html 
+    // solution : centralize serialize() and then creating the Response in every controller
+    protected function createApiResponse($data, $statusCode = 200)
+    {
+        // 1° serialize datas
+        $json = $this->serialize($data);
+        // 2° return response with content-type
+        return new Response($json, $statusCode, array( 
+            'Content-Type' => 'application/json'
+        ));
+    }
+
+    protected function serialize($data, $format = 'json')
+    {
+        // So the serializer works like this: you give it an object, and it serializes every property on it. 
+        // Yep, you can control that - just hang on a few minutes. 
+        // But, if any of these properties is null , instead of returning that key with null , it omits it entirely.
+        $context = new SerializationContext(); 
+        $context->setSerializeNull(true);
+
+        return $this->container->get('jms_serializer') 
+            ->serialize($data, $format, $context);
     }
 }
