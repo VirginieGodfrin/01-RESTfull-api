@@ -11,6 +11,7 @@ use Symfony\Component\HttpFoundation\Request;
 use AppBundle\Entity\User;
 use AppBundle\Entity\Programmer;
 use AppBundle\Form\ProgrammerType;
+use AppBundle\Form\UpdateProgrammerType;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Form\FormInterface;
 
@@ -26,9 +27,9 @@ class ProgrammerController extends  BaseController
 		$body = $request->getContent();
 		$data = json_decode($body, true);
 		$programmer = new Programmer();
-		$programmer->setNickname($data['nickname']);
-		$programmer->setAvatarNumber($data['avatarNumber']);
-		$programmer->setTagLine($data['tagLine']);
+		// this work with php 5.6.3
+		$form = $this->createForm(new ProgrammerType(), $programmer);
+        $this->processForm($request, $form);
 		$programmer->setUser($this->findUserByUsername('weaverryan'));
 
 		$em = $this->getDoctrine()->getManager();
@@ -114,13 +115,13 @@ class ProgrammerController extends  BaseController
 			'No programmer found with nickname "%s"',
 			$nickname ));
 		}
-
-		$body = $request->getContent();
-		$data = json_decode($body, true);
-		// process data 
-		$programmer->setNickname($data['nickname']);
-		$programmer->setAvatarNumber($data['avatarNumber']);
-		$programmer->setTagLine($data['tagLine']);
+		// this work with php 5.6.3
+		// array is needed to pass 'is_edit' parameter to form
+		// $form = $this->createForm(new ProgrammerType(), $programmer, array( 
+		// 	'is_edit' => true,
+		// ));
+		$form = $this->createForm(new UpdateProgrammerType(), $programmer);
+        $this->processForm($request, $form);
 
 		$em = $this->getDoctrine()->getManager();
 		$em->persist($programmer);
@@ -144,10 +145,11 @@ class ProgrammerController extends  BaseController
 		);
 	}
 
-	// In tuto we use form and submit method to "process" data before persist, this doesn't work for me !
-	// private function processForm(Request $request, FormInterface $form) {
-	// 	$data = json_decode($request->getContent(), true);
-	// 	$form->submit($data);
-	// }
+
+	private function processForm(Request $request, FormInterface $form)
+    {
+        $data = json_decode($request->getContent(), true);
+		$form->submit($data);
+    }
 
 }

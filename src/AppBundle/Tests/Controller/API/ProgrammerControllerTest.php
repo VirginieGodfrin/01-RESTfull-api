@@ -13,6 +13,7 @@ class ProgrammerControllerTest extends ApiTestCase
 		$this->createUser('weaverryan');
 	}
 
+
 	public function testPOST()
 	{
 		$nickname = 'ObjectOrienter'.rand(0, 999); 
@@ -100,7 +101,7 @@ class ProgrammerControllerTest extends ApiTestCase
 		));
 		// new data to update
 		$data = array(
-			'nickname' => 'CowboyCoder', 
+			'nickname' => 'CowgirlCoder', 
 			'avatarNumber' => 2,
 			'tagLine' => 'foo'
 		);
@@ -111,5 +112,7 @@ class ProgrammerControllerTest extends ApiTestCase
 		// verif
 		$this->assertSame(200, $response->getStatusCode());
 		$this->asserter()->assertResponsePropertySame($response, 'avatarNumber', 2);
+		// the nickname is immutable on edit
+        $this->asserter()->assertResponsePropertyEquals($response, 'nickname', 'CowboyCoder');
 	}
 }

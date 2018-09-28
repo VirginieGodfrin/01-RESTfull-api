@@ -6,13 +6,16 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolverInterface;
 
-
 class ProgrammerType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('nickname', 'text')
+            ->add('nickname', 'text', [
+                // nickname only writeable when we're adding a new programmer
+                // disabled nickname text box when editing
+                'disabled' => $options['is_edit']
+            ])
             ->add('avatarNumber', 'choice', [
                 'choices' => [
                     // the key is the value that will be set
@@ -29,12 +32,14 @@ class ProgrammerType extends AbstractType
             ->add('tagLine', 'textarea')
         ;
     }
-	public function setDefaultOptions(OptionsResolverInterface $resolver) 
-	{
-		$resolver->setDefaults(array(
-			'data_class' => 'AppBundle\Entity\Programmer'
-		));
-	}
+
+    public function setDefaultOptions(OptionsResolverInterface $resolver)
+    {
+        $resolver->setDefaults(array(
+            'data_class' => 'AppBundle\Entity\Programmer',
+            'is_edit' => false,
+        ));
+    }
 
     public function getName()
     {

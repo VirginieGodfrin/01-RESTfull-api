@@ -17,7 +17,7 @@
 
     
     <php>
-        <env name="TEST_BASE_URL" value="http://localhost:8001" />
+        <env name="TEST_BASE_URL" value="http://localhost:8000" />
         <!-- all our API requests will now hit this front controller. -->
     </php>
    
