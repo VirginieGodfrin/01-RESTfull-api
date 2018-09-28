@@ -35,10 +35,9 @@ class ProgrammerController extends  BaseController
 		$em = $this->getDoctrine()->getManager();
 		$em->persist($programmer);
 		$em->flush();
-		// when you create a resource, the status code should be 201:
-		$data = $this->serializeProgrammer($programmer);
-		// $response = new Response(json_encode($data), 201);
-		$response = new JsonResponse($data, 201);
+		// serialise
+		$json = $this->serialize($programmer);
+		$response = new Response($json, 201);
 		// and best-practices say that you should set a Location header on the response
 		// handle url
 		$url = $this->generateUrl(
@@ -66,11 +65,10 @@ class ProgrammerController extends  BaseController
 			'No programmer found with nickname "%s"',
 			$nickname ));
 		}
-
-		$data = $this->serializeProgrammer($programmer);
-
-		// $response = new Response(json_encode($data), 200);
-		$response = new JsonResponse($data, 200);
+		// how to use jms_serializer 2
+		$json = $this->serialize($programmer);
+		// no need jsonResponse with jms-s
+		$response = new Response($json, 200);
 		// setting Content-Type: application/json
 		$response->headers->set('Content-Type', 'application/json');
 		return $response;
@@ -85,16 +83,11 @@ class ProgrammerController extends  BaseController
 		$programmers = $this->getDoctrine() 
 			->getRepository('AppBundle:Programmer') 
 			->findAll();
-		// we need to loop over the Programmers and serialize them one-by-one
-		// by putting the collection inside a key, we have room for more root keys later like maybe count or offset for pagination
-		// your outer JSON should always be an object, not an array (JSON Hijacking)
-		$data = ['programmers' => []];
-		foreach ($programmers as $programmer) {
-			$data['programmers'][] = $this->serializeProgrammer($programmer); 
-		}
+		// how to use jms_serializer with a key 3 
+		$data = ['programmers' => $programmers];
+		$json = $this->serialize($data);
 
-		// $response = new Response(json_encode($data), 200);
-		$response = new JsonResponse($data, 200);
+		$response = new Response($json, 200);
 		$response->headers->set('Content-Type', 'application/json');
 		return $response;
 	}
@@ -127,9 +120,9 @@ class ProgrammerController extends  BaseController
 		$em->persist($programmer);
 		$em->flush();
 
-		$data = $this->serializeProgrammer($programmer);
+		$json = $this->serialize($programmer); 
+		$response = new Response($json, 200);
 
-		$response = new JsonResponse($data, 200);
 		$response->headers->set('Content-Type', 'application/json');
 		return $response;
 
@@ -160,6 +153,12 @@ class ProgrammerController extends  BaseController
 			'powerLevel' => $programmer->getPowerLevel(), 
 			'tagLine' => $programmer->getTagLine(),
 		);
+	}
+
+	// how to use jms_serializer 1
+	private function serialize($data) {
+		return $this->container->get('jms_serializer') 
+			->serialize($data, 'json');
 	}
 
 	// processForm: do the work of passing the data to the form 
