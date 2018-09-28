@@ -12,6 +12,7 @@ use AppBundle\Entity\User;
 use AppBundle\Entity\Programmer;
 use AppBundle\Form\ProgrammerType;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\Form\FormInterface;
 
 class ProgrammerController extends  BaseController
 {
@@ -97,6 +98,42 @@ class ProgrammerController extends  BaseController
 		return $response;
 	}
 
+	/**
+	 * @Route("/api/programmers/{nickname}", name="api_programmers_update") 
+	 * @Method("PUT")
+	 */
+	public function updateAction (Request $request, $nickname)
+	{
+		$programmer = $this->getDoctrine() 
+			->getRepository('AppBundle:Programmer')
+			->findOneByNickname($nickname);
+
+		// error 404
+		if (!$programmer) {
+			throw $this->createNotFoundException(sprintf(
+			'No programmer found with nickname "%s"',
+			$nickname ));
+		}
+
+		$body = $request->getContent();
+		$data = json_decode($body, true);
+		// process data 
+		$programmer->setNickname($data['nickname']);
+		$programmer->setAvatarNumber($data['avatarNumber']);
+		$programmer->setTagLine($data['tagLine']);
+
+		$em = $this->getDoctrine()->getManager();
+		$em->persist($programmer);
+		$em->flush();
+
+		$data = $this->serializeProgrammer($programmer);
+
+		$response = new JsonResponse($data, 200);
+		$response->headers->set('Content-Type', 'application/json');
+		return $response;
+
+	}
+
 	// private function that return an array 
 	private function serializeProgrammer(Programmer $programmer) {
 		return array(
@@ -106,5 +143,11 @@ class ProgrammerController extends  BaseController
 			'tagLine' => $programmer->getTagLine(),
 		);
 	}
+
+	// In tuto we use form and submit method to "process" data before persist, this doesn't work for me !
+	// private function processForm(Request $request, FormInterface $form) {
+	// 	$data = json_decode($request->getContent(), true);
+	// 	$form->submit($data);
+	// }
 
 }

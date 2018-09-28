@@ -90,4 +90,26 @@ class ProgrammerControllerTest extends ApiTestCase
 		// to test it use this commande with --filter and fucntion name :
 		// php bin/phpunit -c app --filter testGETProgrammersCollection src/AppBundle/Tests/Controller/Api/ProgrammerControllerTest.php
 	}
+
+	public function testPUTProgrammer()
+	{
+		$this->createProgrammer(array(
+			'nickname' => 'CowboyCoder',
+			'avatarNumber' => 5,
+			'tagLine' => 'foo'
+		));
+		// new data to update
+		$data = array(
+			'nickname' => 'CowboyCoder', 
+			'avatarNumber' => 2,
+			'tagLine' => 'foo'
+		);
+		// request 
+		$response = $this->client->put('/api/programmers/CowboyCoder', [
+			'body' => json_encode($data) 
+		]);
+		// verif
+		$this->assertSame(200, $response->getStatusCode());
+		$this->asserter()->assertResponsePropertySame($response, 'avatarNumber', 2);
+	}
 }
