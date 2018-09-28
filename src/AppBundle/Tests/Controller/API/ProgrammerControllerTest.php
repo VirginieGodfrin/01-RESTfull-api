@@ -113,6 +113,39 @@ class ProgrammerControllerTest extends ApiTestCase
 		$this->assertSame(200, $response->getStatusCode());
 		$this->asserter()->assertResponsePropertySame($response, 'avatarNumber', 2);
 		// the nickname is immutable on edit
-        $this->asserter()->assertResponsePropertyEquals($response, 'nickname', 'CowboyCoder');
+        $this->asserter()->assertResponsePropertySame($response, 'nickname', 'CowboyCoder');
+	}
+	// use patch when you want edit a resource parameter
+	public function testPATCHProgrammer()
+	{
+		$this->createProgrammer(array( 
+			'nickname' => 'CowboyCoder', 
+			'avatarNumber' => 5, 
+			'tagLine' => 'foo',
+		));
+		$data = array( 
+			'tagLine' => 'bar',
+		);
+		// method : PATCH
+		$response = $this->client->patch('/api/programmers/CowboyCoder', [
+			'body' => json_encode($data) 
+		]);
+		$this->assertSame(200, $response->getStatusCode()); 
+		$this->asserter()->assertResponsePropertySame($response, 'avatarNumber', 5);
+		$this->asserter()->assertResponsePropertySame($response, 'tagLine', 'bar');
+
+	}
+
+	public function testDELETEProgrammer()
+	{
+		$this->createProgrammer(array( 
+			'nickname' => 'UnitTester', 
+			'avatarNumber' => 3,
+		));
+		// no need to return ressources
+		$response = $this->client->delete('/api/programmers/UnitTester');
+		// statut code : 204
+		$this->assertEquals(204, $response->getStatusCode());
+
 	}
 }

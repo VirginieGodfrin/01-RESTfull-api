@@ -101,7 +101,7 @@ class ProgrammerController extends  BaseController
 
 	/**
 	 * @Route("/api/programmers/{nickname}", name="api_programmers_update") 
-	 * @Method("PUT")
+	 * @Method({"PUT", "PATCH"})
 	 */
 	public function updateAction (Request $request, $nickname)
 	{
@@ -134,6 +134,23 @@ class ProgrammerController extends  BaseController
 		return $response;
 
 	}
+	/**
+	 * @Route("/api/programmers/{nickname}") * @Method("DELETE")
+	 */
+	public function deleteAction($nickname)
+	{
+		$programmer = $this->getDoctrine() 
+			->getRepository('AppBundle:Programmer') 
+			->findOneByNickname($nickname);
+
+		if ($programmer) {
+			$em = $this->getDoctrine()->getManager(); 
+			$em->remove($programmer);
+			$em->flush();
+		}
+		// statut code 204
+		return new Response(null, 204);
+	}
 
 	// private function that return an array 
 	private function serializeProgrammer(Programmer $programmer) {
@@ -145,11 +162,15 @@ class ProgrammerController extends  BaseController
 		);
 	}
 
-
+	// processForm: do the work of passing the data to the form 
 	private function processForm(Request $request, FormInterface $form)
     {
         $data = json_decode($request->getContent(), true);
-		$form->submit($data);
+        // the clearmissing : clear all the missing fields, unless the request method is PATCH
+        // second argument of submit(), if it's true any missing fields are nullified
+        // if it's false missing fields are ignored
+        $clearMissing = $request->getMethod() != 'PATCH';
+        $form->submit($data, $clearMissing);
     }
 
 }
