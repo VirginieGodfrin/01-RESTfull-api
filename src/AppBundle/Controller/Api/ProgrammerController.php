@@ -33,18 +33,7 @@ class ProgrammerController extends  BaseController
 
         // Handling Validation in the Controller
         if (!$form->isValid()) {
-        	// collect the errors and put them into a JSON response.
-        	$errors = $this->getErrorsFromForm($form);
-        	// we want type , title and errors keys
-        	$data = [
-        		'type' => 'validation_error',
-				'title' => 'There was a validation error', 
-				'errors' => $errors
-        	];
-        	return new JsonResponse($data, 400);
-        	// print dump for terminal
-        	header('Content-Type: cli');
-        	dump((string) $form->getErrors(true, false));die;
+        	return $this->createValidationErrorResponse($form);
         }
 
 		$programmer->setUser($this->findUserByUsername('weaverryan'));
@@ -122,6 +111,10 @@ class ProgrammerController extends  BaseController
 		$form = $this->createForm(new UpdateProgrammerType(), $programmer);
         $this->processForm($request, $form);
 
+        if (!$form->isValid()) {
+        	return $this->createValidationErrorResponse($form);
+        }
+
 		$em = $this->getDoctrine()->getManager();
 		$em->persist($programmer);
 		$em->flush();
@@ -176,7 +169,8 @@ class ProgrammerController extends  BaseController
     }
 
     // getErrorsFromForm: collect errors form each fields
-    private function getErrorsFromForm(FormInterface $form) {
+    private function getErrorsFromForm(FormInterface $form) 
+    {
 		$errors = array();
 		foreach ($form->getErrors() as $error) {
 			$errors[] = $error->getMessage(); 
@@ -189,6 +183,17 @@ class ProgrammerController extends  BaseController
 			}
 		}
 		return $errors; 
+	}
+
+	private function createValidationErrorResponse(FormInterface $form)
+	{
+        $errors = $this->getErrorsFromForm($form);
+        $data = [
+        	'type' => 'validation_error',
+			'title' => 'There was a validation error', 
+			'errors' => $errors
+        ];
+        return new JsonResponse($data, 400);
 	}
 
 }
