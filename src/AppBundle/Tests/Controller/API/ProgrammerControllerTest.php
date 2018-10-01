@@ -151,11 +151,11 @@ class ProgrammerControllerTest extends ApiTestCase
 
 	}
 	// 1) Test for a Required Username
-	public function testPOST()
+	public function testValidationErrors()
 	{
 		$data = array(
-			'avatarNumber' => 5,
-			'tagLine' => 'a test dev!'
+			'avatarNumber' => 2,
+			'tagLine' => 'bla bla bla'
 		);
         $response = $this->client->post('/api/programmers', [ 
 			'body' => json_encode($data)
@@ -170,6 +170,8 @@ class ProgrammerControllerTest extends ApiTestCase
 			'errors', 
 		));
 		// test error validation on nickname
+		// we use assertResponsePropertyExists for one field 
+		// we use assertResponsePropertiesExist() for many fields
 		$this->asserter()->assertResponsePropertyExists($response, 'errors.nickname');
 		// assert the exact validation message.
 		$this->asserter()->assertResponsePropertyEquals(

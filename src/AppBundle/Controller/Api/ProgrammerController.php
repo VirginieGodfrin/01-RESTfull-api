@@ -30,6 +30,23 @@ class ProgrammerController extends  BaseController
 		// this work with php 5.6.3
 		$form = $this->createForm(new ProgrammerType(), $programmer);
         $this->processForm($request, $form);
+
+        // Handling Validation in the Controller
+        if (!$form->isValid()) {
+        	// collect the errors and put them into a JSON response.
+        	$errors = $this->getErrorsFromForm($form);
+        	// we want type , title and errors keys
+        	$data = [
+        		'type' => 'validation_error',
+				'title' => 'There was a validation error', 
+				'errors' => $errors
+        	];
+        	return new JsonResponse($data, 400);
+        	// print dump for terminal
+        	header('Content-Type: cli');
+        	dump((string) $form->getErrors(true, false));die;
+        }
+
 		$programmer->setUser($this->findUserByUsername('weaverryan'));
 
 		$em = $this->getDoctrine()->getManager();
@@ -157,5 +174,21 @@ class ProgrammerController extends  BaseController
         $clearMissing = $request->getMethod() != 'PATCH';
         $form->submit($data, $clearMissing);
     }
+
+    // getErrorsFromForm: collect errors form each fields
+    private function getErrorsFromForm(FormInterface $form) {
+		$errors = array();
+		foreach ($form->getErrors() as $error) {
+			$errors[] = $error->getMessage(); 
+		}
+		foreach ($form->all() as $childForm) {
+			if ($childForm instanceof FormInterface) {
+				if ($childErrors = $this->getErrorsFromForm($childForm)) { 
+					$errors[$childForm->getName()] = $childErrors;
+				} 
+			}
+		}
+		return $errors; 
+	}
 
 }
