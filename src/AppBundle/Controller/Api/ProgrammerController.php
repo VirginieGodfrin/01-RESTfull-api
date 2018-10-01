@@ -14,6 +14,7 @@ use AppBundle\Form\ProgrammerType;
 use AppBundle\Form\UpdateProgrammerType;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Form\FormInterface;
+use AppBundle\Api\ApiProblem;
 
 class ProgrammerController extends  BaseController
 {
@@ -188,12 +189,15 @@ class ProgrammerController extends  BaseController
 	private function createValidationErrorResponse(FormInterface $form)
 	{
         $errors = $this->getErrorsFromForm($form);
-        $data = [
-        	'type' => 'validation_error',
-			'title' => 'There was a validation error', 
-			'errors' => $errors
-        ];
-        $response = new JsonResponse($data, 400);
+        // use api problem
+        $apiProblem = new ApiProblem( 
+        	400,
+			ApiProblem::TYPE_VALIDATION_ERROR
+		);
+
+		$apiProblem->set('errors', $errors);
+
+        $response = new JsonResponse($apiProblem->toArray(), 400);
         // set content type of response header
         $response->headers->set('Content-Type', 'application/problem+json');
 		return $response;
