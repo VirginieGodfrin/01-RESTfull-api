@@ -150,4 +150,34 @@ class ProgrammerControllerTest extends ApiTestCase
 		$this->assertEquals(204, $response->getStatusCode());
 
 	}
+	// 1) Test for a Required Username
+	public function testPOST()
+	{
+		$data = array(
+			'avatarNumber' => 5,
+			'tagLine' => 'a test dev!'
+		);
+        $response = $this->client->post('/api/programmers', [ 
+			'body' => json_encode($data)
+		]);
+		// because we don't return nickname we use 400 statut code
+		$this->assertSame(400, $response->getStatusCode());
+		// Validation Errors Response Body : 
+		// with assertResponsePropertiesExist() response have 3 prop : type, title, errors
+		$this->asserter()->assertResponsePropertiesExist($response, array( 
+			'type',
+			'title',
+			'errors', 
+		));
+		// test error validation on nickname
+		$this->asserter()->assertResponsePropertyExists($response, 'errors.nickname');
+		// assert the exact validation message.
+		$this->asserter()->assertResponsePropertyEquals(
+			$response, 
+			'errors.nickname[0]', 
+			'Please enter a clever nickname'
+		);
+		// test avatarNumber
+		$this->asserter()->assertResponsePropertyDoesNotExist($response, 'errors.avatarNumber');
+	}
 }
