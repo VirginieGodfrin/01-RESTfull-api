@@ -181,5 +181,7 @@ class ProgrammerControllerTest extends ApiTestCase
 		);
 		// test avatarNumber
 		$this->asserter()->assertResponsePropertyDoesNotExist($response, 'errors.avatarNumber');
+		// test the response header
+		$this->assertSame('application/problem+json', $response->getHeader('Content-Type'));
 	}
 }
