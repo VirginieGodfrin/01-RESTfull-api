@@ -15,6 +15,7 @@ use AppBundle\Form\UpdateProgrammerType;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Form\FormInterface;
 use AppBundle\Api\ApiProblem;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class ProgrammerController extends  BaseController
 {
@@ -162,9 +163,10 @@ class ProgrammerController extends  BaseController
 	private function processForm(Request $request, FormInterface $form)
     {
         $data = json_decode($request->getContent(), true);
-        // the clearmissing : clear all the missing fields, unless the request method is PATCH
-        // second argument of submit(), if it's true any missing fields are nullified
-        // if it's false missing fields are ignored
+        // If the $body has a bad format, then $data will be null, then return 400 status code
+        if ($data === null) {
+        	throw new HttpException(400, 'Invalid JSON body!');
+        }
         $clearMissing = $request->getMethod() != 'PATCH';
         $form->submit($data, $clearMissing);
     }
