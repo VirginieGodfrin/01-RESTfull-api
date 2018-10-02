@@ -7,11 +7,11 @@ namespace AppBundle\Api;
  */
 class ApiProblem
 {
-    // creating a contant title 
+    // creating a constant title 
     const TYPE_VALIDATION_ERROR = 'validation_error';
 
     private static $titles = array(
-        self::TYPE_VALIDATION_ERROR => 'There was a validation error'
+        self::TYPE_VALIDATION_ERROR => 'There was a validation error',
     );
 
     private $statusCode;

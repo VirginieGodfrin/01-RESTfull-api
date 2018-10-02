@@ -187,17 +187,16 @@ class ProgrammerControllerTest extends ApiTestCase
 
 	public function testInvalidJson()
 	{
-		// bad json
-		$invalidBody = <<<EOF
+		// bad json 
+		$invalidJson = <<<EOF
 {
-	"nickname": "JohnnyRobot",
-    "avatarNumber" : "2",
+    "avatarNumber" : "2
     "tagLine": "I'm from a test!"
 }
 EOF;
-
+		// correct response !
         $response = $this->client->post('/api/programmers', [ 
-			'body' => json_encode($invalidBody)
+			'body' => $invalidJson
 		]);
 		$this->debugResponse($response);
 		$this->assertSame(400, $response->getStatusCode());
