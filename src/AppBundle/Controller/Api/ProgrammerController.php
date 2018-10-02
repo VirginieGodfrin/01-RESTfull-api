@@ -15,6 +15,7 @@ use AppBundle\Form\UpdateProgrammerType;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Form\FormInterface;
 use AppBundle\Api\ApiProblem;
+use AppBundle\Api\ApiProblemException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class ProgrammerController extends  BaseController
@@ -168,7 +169,7 @@ class ProgrammerController extends  BaseController
         	// creating an ApiProblem, so we can only throw an exception to stop the flow, and
         	// the response body that an HttpException generates is still an HTML error page
         	$apiProblem = new ApiProblem(400, ApiProblem::TYPE_INVALID_REQUEST_BODY_FORMAT);
-        	throw new HttpException(400, 'Invalid JSON body!');
+        	throw new ApiProblemException($apiProblem);
 
         }
         $clearMissing = $request->getMethod() != 'PATCH';

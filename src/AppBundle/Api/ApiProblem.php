@@ -58,4 +58,8 @@ class ApiProblem
     {
         return $this->statusCode;
     }
+
+    public function getTitle() {
+        return $this->title; 
+    }
 }
