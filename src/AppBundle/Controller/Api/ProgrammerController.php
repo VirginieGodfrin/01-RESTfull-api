@@ -165,7 +165,11 @@ class ProgrammerController extends  BaseController
         $data = json_decode($request->getContent(), true);
         // If the $body has a bad format, then $data will be null, then return 400 status code
         if ($data === null) {
+        	// creating an ApiProblem, so we can only throw an exception to stop the flow, and
+        	// the response body that an HttpException generates is still an HTML error page
+        	$apiProblem = new ApiProblem(400, ApiProblem::TYPE_INVALID_REQUEST_BODY_FORMAT);
         	throw new HttpException(400, 'Invalid JSON body!');
+
         }
         $clearMissing = $request->getMethod() != 'PATCH';
         $form->submit($data, $clearMissing);
