@@ -8,6 +8,7 @@ use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use AppBundle\Api\ApiProblem;
 use AppBundle\Api\ApiProblemException;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 
 // When we throw an ApiProblemException , we need our app to automatically turn that into a nicely-formatted API Problem JSON 
 // response and return it.  That code needs to live in a global spot.
@@ -23,13 +24,12 @@ class ApiExceptionSubscriber implements EventSubscriberInterface
 		// to do, detect if an ApiProblemException was thrown and create a nice Api Problem JSON response if it was
 		// 1° get access to the exception 
 		$e = $event->getException();
-		//  normal exceptions will still be handled via Symfony's core listener
-		if (!$e instanceof ApiProblemException) 
-		{
-			return; 
+		if ($e instanceof ApiProblemException) { 
+			$apiProblem = $e->getApiProblem();
+		} else {
+			$statusCode = $e instanceof HttpExceptionInterface ? $e->getStatusCode() : 500;
+			$apiProblem = new ApiProblem($statusCode);
 		}
-		// let's turn ApiProblemException into a Response
-		$apiProblem = $e->getApiProblem();
 		$response = new JsonResponse(
 		 	$apiProblem->toArray(), 
 		 	$apiProblem->getStatusCode()

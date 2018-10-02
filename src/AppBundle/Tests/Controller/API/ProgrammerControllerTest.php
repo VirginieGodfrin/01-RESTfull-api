@@ -184,7 +184,7 @@ class ProgrammerControllerTest extends ApiTestCase
 		// test the response header
 		$this->assertSame('application/problem+json', $response->getHeader('Content-Type'));
 	}
-
+	// test invalid json
 	public function testInvalidJson()
     {
         $invalidBody = <<<EOF
@@ -202,5 +202,18 @@ EOF;
         // $this->debugResponse($response);
         $this->assertSame(400, $response->getStatusCode());
         $this->asserter()->assertResponsePropertyEquals($response, 'type', 'invalid_body_format');
+    }
+    // test 404
+    public function test404Exception()
+    {
+    	$response = $this->client->get('/api/programmers/fake');
+    	$this->assertSame(404, $response->getStatusCode());
+		$this->assertSame('application/problem+json', $response->getHeader('Content-Type'));
+		// the 404 status code already says everything we need to
+		// Under "Pre-Defined Problem Types", it says that if the status code is enough, 
+		// you can set type to about:blank 
+		$this->asserter()->assertResponsePropertyEquals($response, 'type', 'about:blank');
+		// set title to whatever the standard text is for that status code. A 404 would be "Not Found".
+		$this->asserter()->assertResponsePropertyEquals($response, 'title', 'Not Found');
     }
 }
