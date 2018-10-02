@@ -9,7 +9,7 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class ApiProblemException extends HttpException
 {
-    // independency injection, an HttpException with an ApiProblem
+    // independence injection, an HttpException with an ApiProblem
     private $apiProblem;
 
     public function __construct(ApiProblem $apiProblem, \Exception $previous = null, array $headers = array(), $code = 0)

@@ -64,7 +64,7 @@ class ProgrammerControllerTest extends ApiTestCase
 		// because assertEquals do not work well I create assertResponsePropertySame that do the same work !
 		$this->asserter()->assertResponsePropertySame($response, 'nickname', 'UnitTester');
 		//debug the response
-		$this->debugResponse($response);
+		// $this->debugResponse($response);
 	}
 
 	// testing the GET collection 
@@ -186,20 +186,21 @@ class ProgrammerControllerTest extends ApiTestCase
 	}
 
 	public function testInvalidJson()
-	{
-		// bad json 
-		$invalidJson = <<<EOF
+    {
+        $invalidBody = <<<EOF
 {
+    "nickname": "JohnnyRobot",
     "avatarNumber" : "2
     "tagLine": "I'm from a test!"
 }
 EOF;
-		// correct response !
-        $response = $this->client->post('/api/programmers', [ 
-			'body' => $invalidJson
-		]);
-		$this->debugResponse($response);
-		$this->assertSame(400, $response->getStatusCode());
-		$this->asserter()->assertResponsePropertyEquals($response, 'type', 'invalid_body_format');
-	}
+
+        $response = $this->client->post('/api/programmers', [
+            'body' => $invalidBody
+        ]);
+
+        // $this->debugResponse($response);
+        $this->assertSame(400, $response->getStatusCode());
+        $this->asserter()->assertResponsePropertyEquals($response, 'type', 'invalid_body_format');
+    }
 }
