@@ -215,5 +215,7 @@ EOF;
 		$this->asserter()->assertResponsePropertyEquals($response, 'type', 'about:blank');
 		// set title to whatever the standard text is for that status code. A 404 would be "Not Found".
 		$this->asserter()->assertResponsePropertyEquals($response, 'title', 'Not Found');
+		// introducing the detail Property
+		$this->asserter()->assertResponsePropertyEquals($response, 'detail', 'No programmer found with nickname "fake"');
     }
 }
