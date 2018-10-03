@@ -17,25 +17,45 @@ use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 
 class ApiExceptionSubscriber implements EventSubscriberInterface
 {
+	// create a debug mode
+	
+	private $debug;
+
+	public function __construct($debug){
+		$this->debug = $debug;
+	}
 	// whenever an exception is thrown, Symfony will call this method, with a GetResponseForExceptionEvent object
 	public function onKernelException(GetResponseForExceptionEvent $event)
 	{
-		// onKernelException() try to understand what went wrong and return a Response. 
-		// to do, detect if an ApiProblemException was thrown and create a nice Api Problem JSON response if it was
-		// 1° get access to the exception 
+		if (strpos($event->getRequest()->getPathInfo(), '/api') !== 0) { 
+			return;
+		}
+		// exception
 		$e = $event->getException();
+		// statut code 500
+		$statusCode = $e instanceof HttpExceptionInterface ? $e->getStatusCode() : 500;
+
+		if ($statusCode == 500 && $this->debug){
+			// Symfony's normal exception handling will take over from here.
+			return;
+		}
 		if ($e instanceof ApiProblemException) { 
 			$apiProblem = $e->getApiProblem();
 		} else {
-			$statusCode = $e instanceof HttpExceptionInterface ? $e->getStatusCode() : 500;
+			
 			$apiProblem = new ApiProblem($statusCode);
 			// create detail
 			if ($e instanceof HttpExceptionInterface) {
 				$apiProblem->set('detail', $e->getMessage());
 			}
 		}
+		$data = $apiProblem->toArray();
+		if ($data['type'] != 'about:blank'){
+			$data['type'] = 'http://localhost:8000/docs/errors#'.$data['type'];
+		}
+
 		$response = new JsonResponse(
-		 	$apiProblem->toArray(), 
+		 	$data, 
 		 	$apiProblem->getStatusCode()
 		 );
         $response->headers->set('Content-Type', 'application/problem+json');

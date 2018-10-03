@@ -26,7 +26,8 @@ class ProgrammerController extends  BaseController
 	*/
 	public function newAction(Request $request)
 	{
-
+		// throw new \Exception();
+		
 		$body = $request->getContent();
 		$data = json_decode($body, true);
 		$programmer = new Programmer();

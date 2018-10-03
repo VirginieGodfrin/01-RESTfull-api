@@ -147,7 +147,7 @@ class ProgrammerControllerTest extends ApiTestCase
 		// no need to return ressources
 		$response = $this->client->delete('/api/programmers/UnitTester');
 		// statut code : 204
-		$this->assertEquals(204, $response->getStatusCode());
+		$this->assertSame(204, $response->getStatusCode());
 
 	}
 	// 1) Test for a Required Username
@@ -174,7 +174,7 @@ class ProgrammerControllerTest extends ApiTestCase
 		// we use assertResponsePropertiesExist() for many fields
 		$this->asserter()->assertResponsePropertyExists($response, 'errors.nickname');
 		// assert the exact validation message.
-		$this->asserter()->assertResponsePropertyEquals(
+		$this->asserter()->assertResponsePropertySame(
 			$response, 
 			'errors.nickname[0]', 
 			'Please enter a clever nickname'
@@ -201,7 +201,7 @@ EOF;
 
         // $this->debugResponse($response);
         $this->assertSame(400, $response->getStatusCode());
-        $this->asserter()->assertResponsePropertyEquals($response, 'type', 'invalid_body_format');
+        $this->asserter()->assertResponsePropertyContains($response, 'type', 'invalid_body_format');
     }
     // test 404
     public function test404Exception()
@@ -212,10 +212,10 @@ EOF;
 		// the 404 status code already says everything we need to
 		// Under "Pre-Defined Problem Types", it says that if the status code is enough, 
 		// you can set type to about:blank 
-		$this->asserter()->assertResponsePropertyEquals($response, 'type', 'about:blank');
+		$this->asserter()->assertResponsePropertySame($response, 'type', 'about:blank');
 		// set title to whatever the standard text is for that status code. A 404 would be "Not Found".
-		$this->asserter()->assertResponsePropertyEquals($response, 'title', 'Not Found');
+		$this->asserter()->assertResponsePropertySame($response, 'title', 'Not Found');
 		// introducing the detail Property
-		$this->asserter()->assertResponsePropertyEquals($response, 'detail', 'No programmer found with nickname "fake"');
+		$this->asserter()->assertResponsePropertySame($response, 'detail', 'No programmer found with nickname "fake"');
     }
 }
