@@ -13,10 +13,20 @@ class PaginatedCollection
 
 	private $count;
 
+	// add those next , previous , first and last links.
+	private $_links = array();
+
 	public function __construct(array $items, $totalItems) {
 		$this->items = $items; 
 		$this->total = $totalItems; 
 		$this->count = count($items);
+	}
+
+	// add links
+	// the $ref - that's the name of the link (first - last)
+	// the url
+	public function addLink($ref, $url) {
+		$this->_links[$ref] = $url; 
 	}
 
 }

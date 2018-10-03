@@ -81,7 +81,7 @@ class ProgrammerController extends  BaseController
 	}
 
 	/**
-	 * @Route("/api/programmers") 
+	 * @Route("/api/programmers", name="api_programmers_collection") 
 	 * @Method("GET")
 	 */
 	public function listAction(Request $request)
@@ -121,6 +121,30 @@ class ProgrammerController extends  BaseController
 		
 		// Using the new class is easy
 		$paginatedCollection = new PaginatedCollection($programmers, $pagerfanta->getNbResults());
+		// add links , every link will point to the same route,
+		$route = 'api_programmers_collection';
+		// create $routeParams : this will hold any wildcards that need to be passed to the route
+		$routeParams = array();
+
+		$createLinkUrl = function($targetPage) use ($route, $routeParams) {
+			return $this->generateUrl($route, array_merge( $routeParams,
+				array('page' => $targetPage)
+			));
+		};
+		// Add the first link 
+		$paginatedCollection->addLink('self', $createLinkUrl($page));
+		// page 1
+		$paginatedCollection->addLink('first', $createLinkUrl(1));
+		// last link
+		$paginatedCollection->addLink('last', $createLinkUrl($pagerfanta->getNbPages()));
+		// next and prev link (consitional)
+		if ($pagerfanta->hasNextPage()) {
+			$paginatedCollection->addLink('next', $createLinkUrl($pagerfanta->getNextPage()));
+		}
+		if ($pagerfanta->hasPreviousPage()) {
+			$paginatedCollection->addLink('prev', $createLinkUrl($pagerfanta->getPreviousPage()));
+		}
+
 		// the response with collection
 		$response = $this->createApiResponse($paginatedCollection, 200);
 
