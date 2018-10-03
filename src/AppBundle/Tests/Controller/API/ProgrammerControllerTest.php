@@ -86,10 +86,10 @@ class ProgrammerControllerTest extends ApiTestCase
 		$this->assertSame(200, $response->getStatusCode());
 		// because listAction return an associative array with a programmers (the collection of programmers)
 		// let's first assert that there's a programmers key in the response and that it's an array.
-		$this->asserter()->assertResponsePropertyIsArray($response, 'programmers');
+		$this->asserter()->assertResponsePropertyIsArray($response, 'items');
 		// next, let's assert that there are two things on this array
-		$this->asserter()->assertResponsePropertyCount($response, 'programmers', 2);
-		$this->asserter()->assertResponsePropertySame($response, 'programmers[1].nickname', 'CowboyCoder');
+		$this->asserter()->assertResponsePropertyCount($response, 'items', 2);
+		$this->asserter()->assertResponsePropertySame($response, 'items[1].nickname', 'CowboyCoder');
 		// to test it use this commande with --filter and fucntion name :
 		// php bin/phpunit -c app --filter testGETProgrammersCollection src/AppBundle/Tests/Controller/Api/ProgrammerControllerTest.php
 	}
@@ -111,7 +111,7 @@ class ProgrammerControllerTest extends ApiTestCase
 		// assert that the programmer with index 5 is equal to Programmer5 :
 		$this->asserter()->assertResponsePropertyEquals(
 			$response, 
-			'programmers[5].nickname', 
+			'items[5].nickname', 
 			'Programmer5'
 		);
 		//  how many results are on this page
@@ -139,7 +139,7 @@ class ProgrammerControllerTest extends ApiTestCase
 		// test the next page
 		$this->asserter()->assertResponsePropertyEquals(
 			$response, 
-			'programmers[5].nickname', 
+			'items[5].nickname', 
 			'Programmer15'
 		);
 		//  how many results are on this page
@@ -154,13 +154,13 @@ class ProgrammerControllerTest extends ApiTestCase
 
 		$this->asserter()->assertResponsePropertyEquals(
 			$response, 
-			'programmers[4].nickname', 
+			'items[4].nickname', 
 			'Programmer24'
 		);
 		// make sure that there is no programmer here with index 5
 		$this->asserter()->assertResponsePropertyDoesNotExist(
 			$response, 
-			'programmers[5].nickname'
+			'items[5].nickname'
 		);
 
 		$this->asserter()->assertResponsePropertyEquals(

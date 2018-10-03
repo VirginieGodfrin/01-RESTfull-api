@@ -17,6 +17,9 @@ use Symfony\Component\Form\FormInterface;
 use AppBundle\Api\ApiProblem;
 use AppBundle\Api\ApiProblemException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
+use Pagerfanta\Adapter\DoctrineORMAdapter;
+use Pagerfanta\Pagerfanta;
+use AppBundle\Pagination\PaginatedCollection;
 
 class ProgrammerController extends  BaseController
 {
@@ -81,13 +84,46 @@ class ProgrammerController extends  BaseController
 	 * @Route("/api/programmers") 
 	 * @Method("GET")
 	 */
-	public function listAction()
+	public function listAction(Request $request)
 	{
-		$programmers = $this->getDoctrine() 
+		// make pagination : you need to tell the pagination library what page you're on and give it a query builder
+		// The 1 is the default value in case there is no query parameter:
+		$page = $request->query->get('page', 1);
+		// create a query builder
+		$qb = $this->getDoctrine() 
 			->getRepository('AppBundle:Programmer') 
-			->findAll();
-		$data = ['programmers' => $programmers];
-		$response = $this->createApiResponse($data, 200);
+			->findAllQueryBuilder();
+		// 1° adaptater
+		$adapter = new DoctrineORMAdapter($qb);
+		// 2° pagerfanta
+		$pagerfanta = new Pagerfanta($adapter);
+		// 3° max per page 
+		$pagerfanta->setMaxPerPage(10); 
+		// 4° current page 
+		$pagerfanta->setCurrentPage($page);
+
+		// Using Pagerfanta to Fetch Results
+		// we need Pagerfanta to return the programmers based on whatever page is being requested
+		// $pagerfanta->getCurrentPageResults() return a type of traversable object with those programmes inside
+		// This confuses the serializer
+		// loop over that traversable object from Pagerfanta and push each Programmer object into our simple array
+		$programmers = [];
+		foreach ($pagerfanta->getCurrentPageResults() as $result) {
+			$programmers[] = $result;
+		}
+		// In createApiResponse , we still need to pass in the programmers key, but we also need to add count and total
+		// Add the total key and set it to $pagerfanta->getNbResults()
+		// $response = $this->createApiResponse([ 
+		// 	'total' => $pagerfanta->getNbResults(), 
+		// 	'count' => count($programmers), 
+		// 	'programmers' => $programmers,
+		// ], 200);
+		
+		// Using the new class is easy
+		$paginatedCollection = new PaginatedCollection($programmers, $pagerfanta->getNbResults());
+		// the response with collection
+		$response = $this->createApiResponse($paginatedCollection, 200);
+
 		return $response;
 	}
 
