@@ -94,6 +94,82 @@ class ProgrammerControllerTest extends ApiTestCase
 		// php bin/phpunit -c app --filter testGETProgrammersCollection src/AppBundle/Tests/Controller/Api/ProgrammerControllerTest.php
 	}
 
+	// pagination  
+	public function testGETProgrammersCollectionPaginated()
+	{
+		// create 25 programmers
+		for ($i = 0; $i < 25; $i++) { 
+			$this->createProgrammer(array(
+				'nickname' => 'Programmer'.$i,
+				'avatarNumber' => 3, 
+			));
+		}
+
+		$response = $this->client->get('/api/programmers');
+
+		$this->assertSame(200, $response->getStatusCode());
+		// assert that the programmer with index 5 is equal to Programmer5 :
+		$this->asserter()->assertResponsePropertyEquals(
+			$response, 
+			'programmers[5].nickname', 
+			'Programmer5'
+		);
+		//  how many results are on this page
+		$this->asserter()->assertResponsePropertyEquals(
+			$response, 
+			'count', 
+			10
+		);
+		// how many results there are in total
+		$this->asserter()->assertResponsePropertyEquals(
+			$response, 
+			'total', 
+			25
+		);
+		// link correspond to next link whose value will be the URL to get the next page of results
+		$this->asserter()->assertResponsePropertyExists(
+			$response, 
+			'_links.next'
+		);
+		// we need to make a request to page 2 and make sure we see the next 10 programmers
+		// we can read the next link and use that for the next request like clicking links
+		$nextLink = $this->asserter()->readResponseProperty($response, '_links.next');
+		$response = $this->client->get($nextLink);
+
+		// test the next page
+		$this->asserter()->assertResponsePropertyEquals(
+			$response, 
+			'programmers[5].nickname', 
+			'Programmer15'
+		);
+		//  how many results are on this page
+		$this->asserter()->assertResponsePropertyEquals(
+			$response, 
+			'count', 
+			10
+		);
+		// test the last link
+		$lastLink = $this->asserter()->readResponseProperty($response, '_links.last');
+		$response = $this->client->get($lastLink);
+
+		$this->asserter()->assertResponsePropertyEquals(
+			$response, 
+			'programmers[4].nickname', 
+			'Programmer24'
+		);
+		// make sure that there is no programmer here with index 5
+		$this->asserter()->assertResponsePropertyDoesNotExist(
+			$response, 
+			'programmers[5].nickname'
+		);
+
+		$this->asserter()->assertResponsePropertyEquals(
+			$response, 
+			'count', 
+			5
+		);
+	}
+
 	public function testPUTProgrammer()
 	{
 		$this->createProgrammer(array(

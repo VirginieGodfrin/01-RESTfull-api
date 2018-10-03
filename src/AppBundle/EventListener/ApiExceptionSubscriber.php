@@ -27,6 +27,9 @@ class ApiExceptionSubscriber implements EventSubscriberInterface
 	// whenever an exception is thrown, Symfony will call this method, with a GetResponseForExceptionEvent object
 	public function onKernelException(GetResponseForExceptionEvent $event)
 	{
+		// if I just invent a URL, on the web interface I get a JSON response. 
+		// This makes sense because the subscriber has completely taken over the error handling for our site
+		// fix it, when the URL correspond to /api ApiExceptionSubscriber it works but if it's not it leaft ! 
 		if (strpos($event->getRequest()->getPathInfo(), '/api') !== 0) { 
 			return;
 		}
