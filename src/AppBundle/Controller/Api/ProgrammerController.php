@@ -92,7 +92,7 @@ class ProgrammerController extends  BaseController
 		$qb = $this->getDoctrine() 
 			->getRepository('AppBundle:Programmer') 
 			->findAllQueryBuilder($filter);
-			
+
 		// service pagination 
 		$paginatedCollection = $this->get('pagination_factory') 
 			->createCollection($qb, $request, 'api_programmers_collection');
@@ -140,7 +140,8 @@ class ProgrammerController extends  BaseController
 
 	}
 	/**
-	 * @Route("/api/programmers/{nickname}") * @Method("DELETE")
+	 * @Route("/api/programmers/{nickname}") 
+	 * @Method("DELETE")
 	 */
 	public function deleteAction($nickname)
 	{
