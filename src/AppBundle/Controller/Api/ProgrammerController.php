@@ -86,65 +86,13 @@ class ProgrammerController extends  BaseController
 	 */
 	public function listAction(Request $request)
 	{
-		// make pagination : you need to tell the pagination library what page you're on and give it a query builder
-		// The 1 is the default value in case there is no query parameter:
-		$page = $request->query->get('page', 1);
-		// create a query builder
 		$qb = $this->getDoctrine() 
 			->getRepository('AppBundle:Programmer') 
 			->findAllQueryBuilder();
-		// 1° adaptater
-		$adapter = new DoctrineORMAdapter($qb);
-		// 2° pagerfanta
-		$pagerfanta = new Pagerfanta($adapter);
-		// 3° max per page 
-		$pagerfanta->setMaxPerPage(10); 
-		// 4° current page 
-		$pagerfanta->setCurrentPage($page);
-
-		// Using Pagerfanta to Fetch Results
-		// we need Pagerfanta to return the programmers based on whatever page is being requested
-		// $pagerfanta->getCurrentPageResults() return a type of traversable object with those programmes inside
-		// This confuses the serializer
-		// loop over that traversable object from Pagerfanta and push each Programmer object into our simple array
-		$programmers = [];
-		foreach ($pagerfanta->getCurrentPageResults() as $result) {
-			$programmers[] = $result;
-		}
-		// In createApiResponse , we still need to pass in the programmers key, but we also need to add count and total
-		// Add the total key and set it to $pagerfanta->getNbResults()
-		// $response = $this->createApiResponse([ 
-		// 	'total' => $pagerfanta->getNbResults(), 
-		// 	'count' => count($programmers), 
-		// 	'programmers' => $programmers,
-		// ], 200);
+		// service pagination 
+		$paginatedCollection = $this->get('pagination_factory') 
+			->createCollection($qb, $request, 'api_programmers_collection');
 		
-		// Using the new class is easy
-		$paginatedCollection = new PaginatedCollection($programmers, $pagerfanta->getNbResults());
-		// add links , every link will point to the same route,
-		$route = 'api_programmers_collection';
-		// create $routeParams : this will hold any wildcards that need to be passed to the route
-		$routeParams = array();
-
-		$createLinkUrl = function($targetPage) use ($route, $routeParams) {
-			return $this->generateUrl($route, array_merge( $routeParams,
-				array('page' => $targetPage)
-			));
-		};
-		// Add the first link 
-		$paginatedCollection->addLink('self', $createLinkUrl($page));
-		// page 1
-		$paginatedCollection->addLink('first', $createLinkUrl(1));
-		// last link
-		$paginatedCollection->addLink('last', $createLinkUrl($pagerfanta->getNbPages()));
-		// next and prev link (consitional)
-		if ($pagerfanta->hasNextPage()) {
-			$paginatedCollection->addLink('next', $createLinkUrl($pagerfanta->getNextPage()));
-		}
-		if ($pagerfanta->hasPreviousPage()) {
-			$paginatedCollection->addLink('prev', $createLinkUrl($pagerfanta->getPreviousPage()));
-		}
-
 		// the response with collection
 		$response = $this->createApiResponse($paginatedCollection, 200);
 
