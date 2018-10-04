@@ -65,6 +65,8 @@ class ProgrammerControllerTest extends ApiTestCase
 		$this->asserter()->assertResponsePropertySame($response, 'nickname', 'UnitTester');
 		//debug the response
 		// $this->debugResponse($response);
+		// add a new assert that checks that we have a uri property that's equal to /api/programmers/UnitTester
+		$this->asserter()->assertResponsePropertyEquals($response, 'uri', '/api/programmers/UnitTester');
 	}
 
 	// testing the GET collection 
