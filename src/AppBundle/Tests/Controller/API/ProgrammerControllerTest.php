@@ -66,9 +66,11 @@ class ProgrammerControllerTest extends ApiTestCase
 		//debug the response
 		// $this->debugResponse($response);
 		// add a new assert that checks that we have a uri property that's equal to /api/programmers/UnitTester
+		
+		// change uri to _links.self, the key self is a name used when linking to, your, "self"
 		$this->asserter()->assertResponsePropertySame(
 			$response, 
-			'uri', 
+			'_links.self', 
 			$this->adjustUri('/api/programmers/UnitTester')
 		);
 	}

@@ -6,6 +6,9 @@ use JMS\Serializer\EventDispatcher\EventSubscriberInterface;
 use JMS\Serializer\EventDispatcher\ObjectEvent;
 use JMS\Serializer\JsonSerializationVisitor;
 use Symfony\Component\Routing\RouterInterface;
+use AppBundle\Annotation\Link;
+use Doctrine\Common\Annotations\Reader;
+use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 
 // we want to include the URL to the programmer in its JSON representation. To make that URL, you need the router service. 
 // But it isn't possible to access services from within a method in entity
@@ -16,8 +19,16 @@ class LinkSerializationSubscriber implements EventSubscriberInterface
 {
 	// To generate the real URI, we need the router
 	private $router;
-	public function __construct(RouterInterface $router) {
+
+	// to read anotation we need annotation reader ...
+	private $annotationReader;
+
+	private $expressionLanguage;
+
+	public function __construct(RouterInterface $router, Reader $annotationReader) {
 		$this->router = $router; 
+		$this->annotationReader = $annotationReader;
+		$this->expressionLanguage = new ExpressionLanguage();
 	}
 	
 	public function onPostSerialize(ObjectEvent $event)
@@ -27,16 +38,24 @@ class LinkSerializationSubscriber implements EventSubscriberInterface
 		/** @var JsonSerializationVisitor $visitor */
 		$visitor = $event->getVisitor();
 
-		/** @var Programmer $programmer */
-		$programmer = $event->getObject();
+		$object = $event->getObject();
+		// To read the annotations off of that object :
+		$annotations = $this->annotationReader
+			->getClassAnnotations(new \ReflectionObject($object));
 
-		// that class has a method on it called addData() 
-		// We can use it to add custom fields we want
-		$visitor->addData( 'uri',
-			$this->router->generate('api_programmers_show', [ 
-				'nickname' => $programmer->getNickname()
-			]) 
-		);
+		$links = array();
+
+		foreach ($annotations as $annotation) {
+            if ($annotation instanceof Link) {
+                $uri = $this->router->generate(
+                    $annotation->route,
+                    $this->resolveParams($annotation->params, $object)
+                );
+                $links[$annotation->name] = $uri;
+            }
+        }
+
+		$visitor->addData('_links', $links);
 	}
 
 	// In this method, we'll tell the serializer exactly which events we want to hook into. 
@@ -53,5 +72,15 @@ class LinkSerializationSubscriber implements EventSubscriberInterface
 			)
 		);
 	}
+
+	private function resolveParams(array $params, $object)
+    {
+        foreach ($params as $key => $param) {
+            $params[$key] = $this->expressionLanguage
+                ->evaluate($param, array('object' => $object));
+        }
+
+        return $params;
+    }
 
 }

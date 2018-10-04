@@ -5,6 +5,7 @@ namespace AppBundle\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
 use Symfony\Component\Validator\Constraints as Assert;
+use AppBundle\Annotation\Link;
 
 /**
  * Programmer
@@ -13,6 +14,14 @@ use Symfony\Component\Validator\Constraints as Assert;
  *
  * @ORM\Table(name="battle_programmer")
  * @ORM\Entity(repositoryClass="AppBundle\Repository\ProgrammerRepository")
+ *
+ * Adding Links via Annotations
+ * @Link(
+ *  "self",
+ *  route = "api_programmers_show",
+ *  params = { "nickname": "object.getNickname()" }
+ * )
+ *
  */
 class Programmer
 {
