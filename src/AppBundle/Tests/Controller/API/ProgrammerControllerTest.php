@@ -75,6 +75,19 @@ class ProgrammerControllerTest extends ApiTestCase
 		);
 	}
 
+	// deep deep
+	// The idea is simple: if the client adds ?deep=1 , then the API should expose more embedded objects
+	public function testGETProgrammerDeep() {
+		$this->createProgrammer(array( 
+			'nickname' => 'UnitTester', 
+			'avatarNumber' => 3,
+		));
+		$response = $this->client->get('/api/programmers/UnitTester?deep=1');
+		$this->assertEquals(200, $response->getStatusCode());
+		// test the other obj : the user 
+		$this->asserter()->assertResponsePropertiesExist($response, array( 'user.username'));
+	}
+
 	// testing the GET collection 
 	public function testGETProgrammersCollection() 
 	{

@@ -23,6 +23,7 @@ class LinkSerializationSubscriber implements EventSubscriberInterface
 	// to read anotation we need annotation reader ...
 	private $annotationReader;
 
+	// to Evaluate the Expression
 	private $expressionLanguage;
 
 	public function __construct(RouterInterface $router, Reader $annotationReader) {
@@ -55,7 +56,9 @@ class LinkSerializationSubscriber implements EventSubscriberInterface
             }
         }
 
-		$visitor->addData('_links', $links);
+		if ($links) { 
+			$visitor->addData('_links', $links);
+		}
 	}
 
 	// In this method, we'll tell the serializer exactly which events we want to hook into. 
@@ -68,13 +71,13 @@ class LinkSerializationSubscriber implements EventSubscriberInterface
 				'event' => 'serializer.post_serialize',
 				'method' => 'onPostSerialize',
 				'format' => 'json',
-				'class' => 'AppBundle\Entity\Programmer'
 			)
 		);
 	}
-
+	// you can find it in the finish code ! 
 	private function resolveParams(array $params, $object)
     {
+    	// each parameter is evaluated through the expression language
         foreach ($params as $key => $param) {
             $params[$key] = $this->expressionLanguage
                 ->evaluate($param, array('object' => $object));
