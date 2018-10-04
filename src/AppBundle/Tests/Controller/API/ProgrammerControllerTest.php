@@ -97,6 +97,12 @@ class ProgrammerControllerTest extends ApiTestCase
 	// pagination  
 	public function testGETProgrammersCollectionPaginated()
 	{
+		// new programmer 
+		$this->createProgrammer(array( 
+			'nickname' => 'willnotmatch', 
+			'avatarNumber' => 5,
+		));
+
 		// create 25 programmers
 		for ($i = 0; $i < 25; $i++) { 
 			$this->createProgrammer(array(
@@ -105,23 +111,24 @@ class ProgrammerControllerTest extends ApiTestCase
 			));
 		}
 
-		$response = $this->client->get('/api/programmers');
+		// response with filter
+		$response = $this->client->get('/api/programmers?filter=programmer');
 
 		$this->assertSame(200, $response->getStatusCode());
 		// assert that the programmer with index 5 is equal to Programmer5 :
-		$this->asserter()->assertResponsePropertyEquals(
+		$this->asserter()->assertResponsePropertySame(
 			$response, 
 			'items[5].nickname', 
 			'Programmer5'
 		);
 		//  how many results are on this page
-		$this->asserter()->assertResponsePropertyEquals(
+		$this->asserter()->assertResponsePropertySame(
 			$response, 
 			'count', 
 			10
 		);
 		// how many results there are in total
-		$this->asserter()->assertResponsePropertyEquals(
+		$this->asserter()->assertResponsePropertySame(
 			$response, 
 			'total', 
 			25
@@ -137,13 +144,13 @@ class ProgrammerControllerTest extends ApiTestCase
 		$response = $this->client->get($nextLink);
 
 		// test the next page
-		$this->asserter()->assertResponsePropertyEquals(
+		$this->asserter()->assertResponsePropertySame(
 			$response, 
 			'items[5].nickname', 
 			'Programmer15'
 		);
 		//  how many results are on this page
-		$this->asserter()->assertResponsePropertyEquals(
+		$this->asserter()->assertResponsePropertySame(
 			$response, 
 			'count', 
 			10
@@ -152,7 +159,7 @@ class ProgrammerControllerTest extends ApiTestCase
 		$lastLink = $this->asserter()->readResponseProperty($response, '_links.last');
 		$response = $this->client->get($lastLink);
 
-		$this->asserter()->assertResponsePropertyEquals(
+		$this->asserter()->assertResponsePropertySame(
 			$response, 
 			'items[4].nickname', 
 			'Programmer24'
@@ -163,7 +170,7 @@ class ProgrammerControllerTest extends ApiTestCase
 			'items[5].nickname'
 		);
 
-		$this->asserter()->assertResponsePropertyEquals(
+		$this->asserter()->assertResponsePropertySame(
 			$response, 
 			'count', 
 			5

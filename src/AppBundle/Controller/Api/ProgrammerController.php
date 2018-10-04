@@ -86,9 +86,13 @@ class ProgrammerController extends  BaseController
 	 */
 	public function listAction(Request $request)
 	{
+		// get the filter parameter
+		$filter = $request->query->get('filter');
+
 		$qb = $this->getDoctrine() 
 			->getRepository('AppBundle:Programmer') 
-			->findAllQueryBuilder();
+			->findAllQueryBuilder($filter);
+			
 		// service pagination 
 		$paginatedCollection = $this->get('pagination_factory') 
 			->createCollection($qb, $request, 'api_programmers_collection');

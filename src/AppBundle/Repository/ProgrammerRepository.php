@@ -27,7 +27,20 @@ class ProgrammerRepository extends EntityRepository
     }
     
     // just return $this->createQueryBuilder(); with an alias of programmer 
-    public function findAllQueryBuilder() {
-        return $this->createQueryBuilder('programmer'); 
-    }
+    // public function findAllQueryBuilder() {
+    //     return $this->createQueryBuilder('programmer'); 
+    // }
+
+    // filter argument optional
+    public function findAllQueryBuilder($filter = ''){
+        // the query builder
+        $qb = $this->createQueryBuilder('programmer');
+
+        if ($filter) {
+            // the query
+            $qb->andWhere('programmer.nickname LIKE :filter OR programmer.tagLine LIKE :filter')
+                ->setParameter('filter', '%'.$filter.'%'); 
+        }
+            return $qb;
+        }
 }
