@@ -322,4 +322,12 @@ EOF;
 		// introducing the detail Property
 		$this->asserter()->assertResponsePropertySame($response, 'detail', 'No programmer found with nickname "fake"');
     }
+    // test authentication
+    public function testRequiresAuthentication()
+    {
+    	$response = $this->client->post('/api/programmers', [ 
+    		'body' => '[]'
+		]);
+		$this->assertSame(401, $response->getStatusCode());
+    }
 }

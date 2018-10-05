@@ -29,7 +29,9 @@ class ProgrammerController extends  BaseController
 	*/
 	public function newAction(Request $request)
 	{
-		// throw new \Exception();
+		
+		// Securing a Controller
+		$this->denyAccessUnlessGranted('ROLE_USER');
 		
 		$body = $request->getContent();
 		$data = json_decode($body, true);
